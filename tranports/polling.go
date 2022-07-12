@@ -153,9 +153,9 @@ func (p *Polling) Uri() string {
 	return ""
 }
 
-func NewPolling(option PollingOption) Polling {
+func NewPolling(option PollingOption) *Polling {
 	supportsBinary := false
-	return Polling{
+	return &Polling{
 		SupportsBinary: supportsBinary,
 		Polling:        option.Polling,
 		Name:           "polling",
