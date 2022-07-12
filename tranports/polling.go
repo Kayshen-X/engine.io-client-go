@@ -1,6 +1,10 @@
 package tranports
 
-import "github.com/Kayshen-X/engine.io-client-go"
+import (
+	"github.com/Kayshen-X/engine.io-client-go"
+	"strings"
+)
+import queryString "github.com/google/go-querystring/query"
 
 type Polling struct {
 	engine_io_client_go.Transport
@@ -111,18 +115,17 @@ func (p *Polling) DoPoll() {
 
 }
 
-//func (p *Polling) write() {
-//var self = this;
-//this.writable = false;
-//var callbackfn = function () {
-//	self.writable = true;
-//	self.emit('drain');
-//};
-//
-//parser.encodePayload(packets, this.supportsBinary, function (data) {
-//	self.doWrite(data, callbackfn);
-//});
-//}
+func (p *Polling) Write(packets any) {
+	p.Writable = false
+	//callbackfn := func() {
+	//	p.Writable = true
+	//	//	self.emit('drain');
+	//}
+	//
+	//parser.encodePayload(packets, this.supportsBinary, function (data) {
+	//	self.doWrite(data, callbackfn);
+	//});
+}
 
 func (p *Polling) Uri() string {
 	query := p.Query
@@ -133,24 +136,29 @@ func (p *Polling) Uri() string {
 		schema = "http"
 	}
 	port := ""
-	// cache busting is forced
-	//if (false !== this.timestampRequests) {
-	//	query[this.timestampParam] = yeast();
-	//}
+
+	if p.TimestampRequests != false {
+		query[p.TimestampParam] = "uuid" // yeast()基于时间戳生成uuid
+	}
 
 	if _, ok := query["sid"]; ok && p.SupportsBinary == true {
 		query["b64"] = "1"
 	}
 
-	//query = parseqs.encode(query);
-	if p.Port != "0" && ((schema == "https" && p.Port != "443") || (schema == "http" && p.port != "80")) {
+	if p.Port != "0" && ((schema == "https" && p.Port != "443") || (schema == "http" && p.Port != "80")) {
 		port = ":" + p.Port
 	}
-	queryStr := ""
+	// query序列化为string
+	queryStrRes, _ := queryString.Values(query)
+	queryStr := queryStrRes.Encode()
 	if len(queryStr) != 0 {
 		queryStr = "?" + queryStr
 	}
-	return ""
+	host := p.Hostname
+	if strings.Index(p.Hostname, ":") != -1 {
+		host = "[" + host + "]"
+	}
+	return schema + "://" + host + port + p.Path + queryStr
 }
 
 func NewPolling(option PollingOption) *Polling {
