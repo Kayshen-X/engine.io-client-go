@@ -3,100 +3,102 @@ package engine_io_client_go
 import "errors"
 
 type Transport struct {
-	path              string
-	hostname          string
-	port              string
-	secure            interface{}
-	query             map[string]string
-	timestampParam    string
-	timestampRequests interface{}
-	readyState        string
-	agent             interface{}
-	socket            interface{} // Socket
-	enableXDR         bool
-	withCredentials   bool
-	writable          bool
+	Path              string
+	Hostname          string
+	Port              string
+	Secure            interface{}
+	Query             map[string]string
+	TimestampParam    string
+	TimestampRequests interface{}
+	ReadyState        string
+	Agent             interface{}
+	Socket            interface{} // Socket
+	EnableXDR         bool
+	WithCredentials   bool
+	Writable          bool
 
 	//	SSL options For Client
-	pfx                string
-	key                string
-	passphrase         string
-	cert               string
-	ca                 string
-	ciphers            string
-	rejectUnauthorized bool
-	forceNode          bool
-
-	// results of ReactNative environment detection
-	isReactNative bool
+	Pfx                string
+	Key                string
+	Passphrase         string
+	Cert               string
+	Ca                 string
+	Ciphers            string
+	RejectUnauthorized bool
+	ForceNode          bool
 
 	// other options for client
-	extraHeaders map[string]string
-	localAddress string
+	ExtraHeaders map[string]string
+	LocalAddress string
+
+	//	被继承者实现
+	OnPacket interface{}
+	Write    interface{}
+	DoClose  interface{}
 }
 
 type Send struct {
-	typeName string
-	data     string
+	TypeName string
+	Data     string
 }
 
-func (t *Transport) open() {
-	if t.readyState == "closed" || t.readyState == "" {
-		t.readyState = "opening"
-		t.doOpen()
+func (t *Transport) Open() {
+	if t.ReadyState == "closed" || t.ReadyState == "" {
+		t.ReadyState = "opening"
+		t.DoOpen()
 	}
 }
 
-func (t *Transport) close() {
-	if t.readyState == "opening" || t.readyState == "open" {
-		t.doClose()
-		t.onClose()
+func (t *Transport) Close() {
+	if t.ReadyState == "opening" || t.ReadyState == "open" {
+		t.DoClose()
+		t.OnClose()
 	}
 }
 
-func (t *Transport) send(packets []Send) (bool, error) {
-	if t.readyState == "open" {
-		t.write(packets)
+func (t *Transport) Send(packets []Send) (bool, error) {
+	if t.ReadyState == "open" {
+		t.Write(packets)
 		return true, nil
 	} else {
 		return false, errors.New("transport not open")
 	}
 }
 
-func (t *Transport) onOpen() {
-	t.readyState = "open"
-	t.writable = true
+func (t *Transport) OnOpen() {
+	t.ReadyState = "open"
+	t.Writable = true
 	//	emit onOpen
 }
 
-func (t *Transport) write(packets []Send) {
+//func (t *Transport) Write(packets []Send) {
+//
+//}
+//
+//func (t *Transport) DoClose() {
+//
+//}
 
-}
-
-func (t *Transport) doClose() {
-
-}
-
-func (t *Transport) doOpen() {
-	t.readyState = "open"
-	t.writable = true
+func (t *Transport) DoOpen() {
+	t.ReadyState = "open"
+	t.Writable = true
 	//	emit open
 }
 
-func (t *Transport) onPacket(packet interface{}) {
+//func (t *Transport) OnPacket(packet interface{}) {
+//
+//}
 
-}
-
-func (t *Transport) onClose() {
-	t.readyState = "closed"
+func (t *Transport) OnClose() {
+	t.ReadyState = "closed"
 	//	emit close
 }
 
-func (t *Transport) onData(data string) {
+func (t *Transport) OnData(data string) {
 	//packet := Parser{}
 	//this.onPacket(packet)
 }
 
-func (t *Transport) onPakcet() {
+func (t *Transport) OnPakcet() {
 	//	emit packet
 }
