@@ -7,7 +7,7 @@ type Transport struct {
 	hostname          string
 	port              string
 	secure            interface{}
-	query             string
+	query             map[string]string
 	timestampParam    string
 	timestampRequests interface{}
 	readyState        string
@@ -61,6 +61,12 @@ func (t *Transport) send(packets []Send) (bool, error) {
 	} else {
 		return false, errors.New("transport not open")
 	}
+}
+
+func (t *Transport) onOpen() {
+	t.readyState = "open"
+	t.writable = true
+	//	emit onOpen
 }
 
 func (t *Transport) write(packets []Send) {
