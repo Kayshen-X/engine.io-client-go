@@ -21,9 +21,9 @@ type EventBus struct {
 
 func (eb *EventBus) Publish(topic string, data interface{}) {
 	eb.rm.RLock()
-	if channelArry, found := eb.subscribers[topic]; found {
+	if channelArray, found := eb.subscribers[topic]; found {
 
-		channels := append(DataChannelSlice{}, channelArry...)
+		channels := append(DataChannelSlice{}, channelArray...)
 		go func(data DataEvent, dataChannelSlices DataChannelSlice) {
 			for _, ch := range dataChannelSlices {
 				ch <- data
@@ -41,4 +41,18 @@ func (eb *EventBus) Subscribe(topic string, ch DataChannel) {
 		eb.subscribers[topic] = append([]DataChannel{}, ch)
 	}
 	eb.rm.Unlock()
+}
+
+var eb = &EventBus{
+	subscribers: map[string]DataChannelSlice{},
+}
+
+// Publish  data by topic
+func Publish(topic string, data interface{}) {
+	eb.Publish(topic, data)
+}
+
+// Subscribe data by topic
+func Subscribe(topic string, ch DataChannel) {
+	eb.Subscribe(topic, ch)
 }
